@@ -36,3 +36,8 @@ int main() {
 	res = p1.AddBySvertka(p2);
 	std::cout << "Сложение по свертке: " << res;
 }
+Monom* m1 = new Monom(5, 123);
+Monom* m2 = new Monom(-5, 123);
+
+Monom* m3 = new Monom(5, 123);
+Monom* m4 = new Monom(-4, 8);
