@@ -18,4 +18,5 @@ public:
 	bool IsEmpty() const;
 	void Remove(Link* linkToRemove);
 	int GetCount() const;
+	Link* GetDummy() const;
 };
