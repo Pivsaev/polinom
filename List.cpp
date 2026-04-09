@@ -1,47 +1,50 @@
 #include "List.h"
 
-List::List():head(nullptr), tail(nullptr), count(0)
+List::List():count(0)
 {
+    head = new Link(nullptr, nullptr);
+    head->SetNextLink(head);
+    tail = head;
 }
 
 List::~List()
 {
-	while (head) {
-		Link* temp = head;
-		head = head->GetNextLink();
-		delete temp;
-	}
-	tail = nullptr;
-	count = 0;
+    if (head == nullptr) return;
+    Link* curr = head->GetNextLink();
+    while (curr != head) {
+        Link* temp = curr;
+        curr = curr->GetNextLink();
+        delete temp;
+    }
+    delete head;
+    head = nullptr;
+    tail = nullptr;
+    count = 0;
 }
 
 List& List::operator=(const List& other)
 {
     if (this != &other) {
-        Link* curr = head;
-        while (curr != nullptr) {
-            Link* temp = curr;
-            curr = curr->GetNextLink();
-            delete temp;
+        if (head != nullptr) {
+            Link* curr = head->GetNextLink();
+            while (curr != head) {
+                Link* temp = curr;
+                curr = curr->GetNextLink();
+                delete temp;
+            }
+            head->SetNextLink(head);
+            tail = head;
+            count = 0;
         }
-        head = nullptr;
-        tail = nullptr;
-        count = 0;
-        curr = other.head;
-        while (curr != nullptr) {
-            Monom* newMonom = new Monom(curr->GetMonomData()->GetKoeff(),
-                curr->GetMonomData()->GetSvertka());
-            Link* newLink = new Link(newMonom);
-            if (head == nullptr) {
-                head = newLink;
-                tail = newLink;
+        if (!other.IsEmpty()) {
+            Link* currOther = other.head->GetNextLink();
+            while (currOther != other.head) {
+                Monom* newMonom = new Monom(currOther->GetMonomData()->GetKoeff(),
+                    currOther->GetMonomData()->GetSvertka());
+                Link* newLink = new Link(newMonom);
+                Insert(newLink);
+                currOther = currOther->GetNextLink();
             }
-            else {
-                tail->SetNextLink(newLink);
-                tail = newLink;
-            }
-            count++;
-            curr = curr->GetNextLink();
         }
     }
     return *this;
@@ -49,24 +52,19 @@ List& List::operator=(const List& other)
 
 void List::Insert(Link* newLink)
 {
-	if (head == nullptr) {
-		head = newLink;
-		tail = newLink;
-	}
-	else {
-		tail->SetNextLink(newLink);
-		tail = newLink;
-	}
-	count++;
+    tail->SetNextLink(newLink);
+    newLink->SetNextLink(head);
+    tail = newLink;
+    count++;
 }
 
 Link* List::FindBySvertka(int _svertka) const
 {
-    Link* curr = head;
-    while (curr != nullptr) {
-        if (curr->GetMonomData()->GetSvertka() == _svertka) {
+    if (IsEmpty()) return nullptr;
+    Link* curr = head->GetNextLink();
+    while (curr != head) {
+        if (curr->GetMonomData()->GetSvertka() == _svertka)
             return curr;
-        }
         curr = curr->GetNextLink();
     }
     return nullptr;
@@ -74,7 +72,7 @@ Link* List::FindBySvertka(int _svertka) const
 
 Link* List::GetHead() const
 {
-    return head;
+    return head->GetNextLink();
 }
 
 bool List::IsEmpty() const
@@ -84,27 +82,25 @@ bool List::IsEmpty() const
 
 void List::Remove(Link* linkToRemove)
 {
-    if (linkToRemove == nullptr) return;
-    if (head == linkToRemove) {
-        head = head->GetNextLink();
-        if (head == nullptr) {
-            tail = nullptr;
-        }
-        delete linkToRemove;
-        count--;
-        return;
-    }
-    Link* curr = head;
-    while (curr != nullptr && curr->GetNextLink() != linkToRemove) {
+    if (linkToRemove == nullptr || IsEmpty()) return;
+    Link* prev = head;
+    Link* curr = head->GetNextLink();
+    while (curr != head && curr != linkToRemove) {
+        prev = curr;
         curr = curr->GetNextLink();
     }
-    if (curr != nullptr) {
-        curr->SetNextLink(linkToRemove->GetNextLink());
-        if (linkToRemove == tail) {
-            tail = curr;
+    if (curr == linkToRemove) {
+        prev->SetNextLink(curr->GetNextLink());
+        if (curr == tail) {
+            tail = prev;
         }
-        delete linkToRemove;
+        delete curr;
         count--;
+
+        if (IsEmpty()) {
+            head->SetNextLink(head);
+            tail = head;
+        }
     }
 }
 
@@ -113,20 +109,26 @@ int List::GetCount() const
     return count;
 }
 
+Link* List::GetDummy() const {
+    return head;
+}
+
 std::ostream& operator<<(std::ostream& out, const List& list)
 {
-    out << "[";
-    if (list.head == nullptr) {
-        out << "] head=nullptr tail=nullptr count=0";
+    if (list.IsEmpty()) {
+        out << "[]";
         return out;
     }
-    Link* curr = list.head;
-    while (curr) {
+    out << "[";
+    Link* curr = list.head->GetNextLink();
+    bool first = true;
+    while (curr != list.head) {
+        if (!first) out << "; ";
         out << *curr->GetMonomData();
+        first = false;
         curr = curr->GetNextLink();
-        if (curr) out << "; ";
     }
-    out << "] head=" << *list.head->GetMonomData();
+    out << "] head=" << *list.head->GetNextLink()->GetMonomData();
     out << "; tail=" << *list.tail->GetMonomData();
     out << "; count=" << list.count;
     return out;
