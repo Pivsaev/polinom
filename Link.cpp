@@ -43,3 +43,4 @@ std::ostream& operator<<(std::ostream& out, const Link& link)
 	}
 	return out;
 }
+
