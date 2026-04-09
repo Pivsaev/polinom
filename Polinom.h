@@ -13,4 +13,5 @@ public:
 	Polinom operator+(Polinom& p) const;
 	Polinom(const Polinom& other);
 	Polinom AddBySvertka(const Polinom& other) const;
+	const List& GetList() const { return list; }
 };
