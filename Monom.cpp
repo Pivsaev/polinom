@@ -2,7 +2,25 @@
 
 std::ostream& operator<<(std::ostream& out, const Monom& monom)
 {
-    out << monom.koeff << "x^" << monom.svertka/100 << "y^"<< (monom.svertka/10)%10 << "z^"<< monom.svertka%10;
+    out << monom.koeff;
+    if (monom.svertka / 100 == 1) {
+        out << 'x';
+    }
+    else if (monom.svertka / 100 > 1) {
+        out << "x^" << monom.svertka/100;
+    }
+    if ((monom.svertka / 10) % 10 == 1) {
+        out << 'y';
+    }
+    else if ((monom.svertka / 10) % 10  > 1) {
+        out << "y^" << (monom.svertka / 10) % 10 ;
+    }
+    if (monom.svertka % 10 == 1) {
+        out << 'z';
+    }
+    else if (monom.svertka % 10 > 1) {
+        out << "z^" << monom.svertka % 10;
+    }
     return out;
 }
 
@@ -22,3 +40,4 @@ void Monom::AddKoeff(int _koeff)
 {
     koeff += _koeff;
 }
+
